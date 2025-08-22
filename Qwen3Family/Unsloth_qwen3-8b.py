@@ -41,21 +41,23 @@ def finetune():
         load_in_4bit=True,
     )
 
-    def format_prompt(examples):
-        instructions = examples["instruction"]
-        outputs = examples["output"]
-        texts = []
-        for instruction, output in zip(instructions, outputs):
-            messages = [
-                {"role": "user", "content": instruction},
-                {"role": "assistant", "content": output},
-            ]
-            texts.append(tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False))
-        return {"text": texts}
+    def format_prompt(example):
+        messages = example.get("messages", [])
+        if messages:
+            try:
+                text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
+                return {"text": text}
+            except Exception as e:
+                print(f"Error formatting prompt: {e}")
+                return {"text": ""}
+        else:
+            return {"text": ""}
 
     # Load and format the dataset
-    dataset = load_dataset("WizardLMTeam/WizardLM_evol_instruct_70k", split="train")
-    dataset = dataset.map(format_prompt, batched=True)
+    dataset = load_dataset("Guilherme34/uncensor", split="train")
+    dataset = dataset.map(format_prompt, batched=False)  # Process one example at a time
+    # Filter out empty texts
+    dataset = dataset.filter(lambda x: len(x["text"]) > 0)
 
     # Configure LoRA
     model = FastLanguageModel.get_peft_model(

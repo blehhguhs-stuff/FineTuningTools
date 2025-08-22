@@ -43,7 +43,7 @@ def convert_to_gguf():
 
     # Upload to Hugging Face Hub
     api = HfApi(token=token)
-    repo_id = "realoperator42/Qwen3-4B-Thinking-2507-uncensored-GGUF"
+    repo_id = "realoperator42/Qwen3-4B-Thinking-2507-uncensored-GGUF-newdataset"
     api.create_repo(repo_id, exist_ok=True)
     api.upload_file(
         path_or_fileobj="gguf_model/unsloth.Q4_K_M.gguf",
